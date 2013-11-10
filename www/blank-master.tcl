@@ -59,7 +59,7 @@ ad_page_contract {
   $Id$
 }
 
-if {![info exists doc(type)]} { 
+if {[template::util::is_nil doc(type)]} { 
     set doc(type) {<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">}
 }
 
@@ -98,7 +98,7 @@ if { $css ne "" } {
             foreach param $css {
                 lappend params -[lindex $param 0] [lindex $param 1]
             }
-            template::head::add_css {*}$params
+            eval [concat template::head::add_css $params]
         }
     }
 
@@ -180,7 +180,7 @@ if { [info exists ::acs_blank_master(tinymce)] } {
     set lang_list [list [lang::user::language] [lang::system::language]]
     set tinymce_lang "en"
     foreach elm $lang_list {
-        if { [file exists $::acs::rootdir/${tinymce_relpath}/langs/${elm}.js] } {
+        if { [file exists [acs_root_dir]/${tinymce_relpath}/langs/${elm}.js] } {
             set tinymce_lang $elm
             break
         }
@@ -199,7 +199,7 @@ if {![info exists doc(title)]} {
 # AG: Markup in <title> tags doesn't render well.
 set doc(title) [ns_striphtml $doc(title)]
 
-if {![info exists doc(charset)]} {
+if {[template::util::is_nil doc(charset)]} {
     set doc(charset) [ns_config ns/parameters OutputCharset [ad_conn charset]]
 }
 
@@ -222,7 +222,11 @@ if {[lang::util::translator_mode_p]} {
 
 # Determine if developer support is installed and enabled
 #
-if {[llength [info commands ::ds_show_p]] == 1 && [ds_show_p]} {
+set developer_support_p [expr {
+    [llength [info procs ::ds_show_p]] == 1 && [ds_show_p]
+}]
+
+if {$developer_support_p} {
     template::head::add_css \
         -href "/resources/acs-developer-support/acs-developer-support.css" \
         -media "all"
@@ -238,6 +242,7 @@ if {[info exists focus] && $focus ne ""} {
             -event onload \
             -script "acs_Focus('${form_name}', '${element_name}');" \
             -identifier "focus"
+        
     }
 }
 

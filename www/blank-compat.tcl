@@ -8,7 +8,7 @@ ad_page_contract {
   $Id$
 }
 
-if { ![info exists title] } {
+if { [template::util::is_nil title] } {
     set title [ad_conn instance_name]
 }
 
